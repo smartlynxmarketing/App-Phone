@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Home Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { appDark: '#0B111E', appCard: '#151C2C', appMuted: '#64748B', appTeal: '#0A3F36', appTealLight: '#1CD1A1' },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: transparent; margin: 0; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes party-pulse { 0%, 100% { box-shadow: 0 0 12px rgba(168,85,247,0.2); } 50% { box-shadow: 0 0 22px rgba(168,85,247,0.4); } }
+    .party-active-glow { animation: party-pulse 2s infinite ease-in-out; }
+    @keyframes alert-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .status-pulse { animation: alert-pulse 1.8s infinite; }
+  </style>
+</head>
+<body>
+
+  <div class="flex justify-center items-center w-full min-h-screen p-8">
+
+    <div class="relative w-[290px] h-[580px] bg-appDark rounded-[42px] shadow-2xl border-[8px] border-slate-800/95 flex flex-col overflow-hidden select-none transition-all duration-300 ring-4 ring-slate-950/25">
+      
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-4.5 bg-black rounded-b-xl z-50 flex items-center justify-center">
+        <div class="w-8 h-0.5 bg-neutral-800 rounded-full mb-0.5"></div>
+      </div>
+
+      <div class="flex justify-between items-center px-6 pt-2.5 pb-1 text-[10px] text-white/95 font-medium z-40 bg-appDark/80 backdrop-blur-md">
+        <span id="statusBarTime" class="tracking-wide">--:--</span>
+        <div class="flex items-center space-x-1">
+          <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M2 17h2v4H2v-4zm4-4h2v8H6v-8zm4-4h2v12h-2V9zm4-5h2v17h-2V4zm4-4h2v21h-2V0z"/></svg>
+          <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M12 21a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm10-12A14.93 14.93 0 0 0 12 4 14.93 14.93 0 0 0 2 9c2.39 2.5 5.75 4 10 4s7.61-1.5 10-4zm-3.23 3.51c-1.8 1.5-4.22 2.49-6.77 2.49s-4.97-1-6.77-2.49L12 18l6.77-5.49z"/></svg>
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M17 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm1 9H3V7h14v7zm3-5v6c.8 0 1-.4 1-1V10c0-.6-.2-1-1-1z"/></svg>
+        </div>
+      </div>
+
+      <div class="flex-1 flex flex-col justify-between overflow-y-auto no-scrollbar pb-16 text-white relative z-20">
+        
+        <div id="tab-home" class="px-5 pt-3.5 space-y-4 transition-all duration-300">
+          <div class="flex justify-between items-center">
+            <div>
+              <p id="greetingText" class="text-appMuted text-xs tracking-wide">Good Morning,</p>
+              <h1 id="homeUsername" class="text-2xl font-bold tracking-tight text-white mt-0.5">Mounish</h1>
+            </div>
+            <button onclick="switchTab('settings')" class="w-8.5 h-8.5 rounded-full border border-white/10 flex items-center justify-center bg-slate-900/60 hover:bg-slate-800 transition-colors">
+              <svg class="w-4 h-4 text-appTealLight" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </button>
+          </div>
+
+          <div id="statusCard" class="relative overflow-hidden rounded-[20px] p-4 bg-gradient-to-br from-[#0B4A3F] to-[#08352D] transition-all duration-500 shadow-lg cursor-pointer hover:scale-[1.01]" onclick="toggleSecurity()">
+            <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="flex justify-between items-start">
+              <div class="space-y-0.5">
+                <p class="text-appTealLight/80 text-[9px] font-bold tracking-widest uppercase">SYSTEM STATUS</p>
+                <h2 id="systemStatusTitle" class="text-xl font-bold text-white mt-0.5">All Secure</h2>
+              </div>
+              <div id="systemStatusIcon" class="w-8.5 h-8.5 rounded-full bg-white/5 flex items-center justify-center text-appTealLight border border-white/10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-white/10">
+              <div class="flex items-center space-x-1 text-[10px]" onclick="event.stopPropagation(); toggleLock();">
+                <span id="lockDot" class="w-1.5 h-1.5 rounded-full bg-appTealLight"></span>
+                <span id="lockLabel" class="text-white font-medium hover:text-emerald-300 transition-colors line-clamp-1">Front Door Locked</span>
+              </div>
+              <div class="flex items-center space-x-1 text-[10px]" onclick="event.stopPropagation(); toggleAlarm();">
+                <span id="alarmDot" class="w-1.5 h-1.5 rounded-full bg-appTealLight"></span>
+                <span id="alarmLabel" class="text-white font-medium hover:text-emerald-300 transition-colors line-clamp-1">Alarm Active</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <p class="text-appMuted text-[9px] font-bold tracking-widest uppercase">QUICK SCENES</p>
+            <div class="grid grid-cols-2 gap-3">
+              <div id="scene-morning" onclick="activateScene('morning')" class="group p-4 rounded-[18px] bg-appCard border-2 border-yellow-500/35 transition-all duration-300 cursor-pointer flex flex-col justify-between aspect-square">
+                <div class="w-8 h-8 rounded-full bg-[#1e273a] flex items-center justify-center"><svg class="w-4.5 h-4.5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+                <div><h3 class="text-sm font-bold text-white tracking-wide">Morning</h3><p id="morningStatus" class="text-[11px] text-appTealLight mt-0.5">Active</p></div>
+              </div>
+              <div id="scene-party" onclick="activateScene('party')" class="group p-4 rounded-[18px] bg-appCard border border-white/5 transition-all duration-300 cursor-pointer flex flex-col justify-between aspect-square hover:bg-[#1a2336]">
+                <div class="w-8 h-8 rounded-full bg-[#1e273a] flex items-center justify-center"><svg class="w-4.5 h-4.5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg></div>
+                <div><h3 class="text-sm font-bold text-white tracking-wide">Party</h3><p id="partyStatus" class="text-[11px] text-appMuted mt-0.5">Off</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-devices" class="px-5 pt-3.5 space-y-4 hidden transition-all duration-300">
+          <div><p class="text-appMuted text-[10px] tracking-wide">Device Status</p><h1 class="text-xl font-bold tracking-tight text-white mt-0.5">Smart Rooms</h1></div>
+          <div class="space-y-3">
+            <div class="p-3.5 rounded-xl bg-appCard border border-white/5 space-y-2">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                  <span class="w-7 h-7 rounded-lg bg-yellow-500/10 text-yellow-500 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+                  <div><h3 class="text-xs font-semibold text-white">Living Room</h3><p id="lightPctLabel" class="text-[9px] text-appMuted">Brightness: 80%</p></div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="lightToggle" checked onchange="toggleLight(this.checked)" class="sr-only peer">
+                  <div class="w-8 h-4.5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-appTealLight"></div>
+                </label>
+              </div>
+              <input type="range" id="lightRange" min="0" max="100" value="80" oninput="$('lightPctLabel').innerText=`Brightness: ${this.value}%`" class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-appTealLight">
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-appCard border border-white/5 flex justify-between items-center">
+              <div class="flex items-center space-x-2">
+                <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-3.536 4.978 4.978 0 011.414-3.536m0 0l2.829 2.829m-2.829 4.243L3 21M11.314 11.314a1 1 0 11-1.414-1.414 1 1 0 011.414 1.414zm-7.071-7.071l1.414 1.414m0-1.414l-1.414 1.414"/></svg></span>
+                <div><h3 class="text-xs font-semibold text-white">Smart AC</h3><p class="text-[9px] text-appMuted">Bedroom AC</p></div>
+              </div>
+              <div class="flex items-center space-x-1.5 bg-slate-800/80 rounded-lg p-1 border border-white/5">
+                <button onclick="adjTemp(-1)" class="w-5.5 h-5.5 rounded bg-slate-700 hover:bg-slate-600 font-bold text-xs text-white">-</button>
+                <span id="tempVal" class="text-xs font-semibold w-6.5 text-center text-white">22°C</span>
+                <button onclick="adjTemp(1)" class="w-5.5 h-5.5 rounded bg-slate-700 hover:bg-slate-600 font-bold text-xs text-white">+</button>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-appCard border border-white/5 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center relative overflow-hidden">
+                    <span id="musicPulse" class="absolute inset-0 bg-indigo-500/20 rounded-full animate-ping hidden"></span>
+                    <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                  </span>
+                  <div><h3 id="musicTitle" class="font-semibold text-white text-[11px] line-clamp-1 w-28">Chill Ambient Beats</h3><p class="text-[9px] text-appMuted">Smart Speaker</p></div>
+                </div>
+                <button id="playBtn" onclick="togglePlay()" class="w-7 h-7 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white transition-all">
+                  <svg class="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-settings" class="px-5 pt-3.5 space-y-4 hidden transition-all duration-300">
+          <div><p class="text-appMuted text-[10px] tracking-wide">Customize Experience</p><h1 class="text-xl font-bold tracking-tight text-white mt-0.5">App Settings</h1></div>
+          <div class="space-y-3">
+            <div class="p-3.5 rounded-xl bg-appCard border border-white/5 space-y-1.5">
+              <label class="block text-[8px] font-bold text-appMuted uppercase tracking-widest">Dashboard Owner</label>
+              <div class="flex space-x-2">
+                <input type="text" id="userInput" value="Mounish" class="flex-1 bg-slate-900 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-appTealLight">
+                <button onclick="saveUser()" class="px-2.5 py-1 bg-appTealLight text-appDark text-xs font-bold rounded-lg hover:bg-emerald-400 transition-all">Save</button>
+              </div>
+            </div>
+            <button onclick="toast()" class="w-full py-2 rounded-lg bg-white/5 border border-white/10 text-[11px] font-medium hover:bg-white/10 transition-all">⚡ Simulate Alarm Alert</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="toast" class="absolute top-10 left-3.5 right-3.5 p-2.5 bg-red-950/95 border border-red-500 rounded-xl flex items-start space-x-2 shadow-xl z-50 transform -translate-y-44 opacity-0 transition-all duration-500 pointer-events-none">
+        <span class="p-1 rounded bg-red-500/20 text-red-400"><svg class="w-3.5 h-3.5 status-pulse" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></span>
+        <div><p class="text-[8px] font-bold text-red-400 uppercase tracking-widest">Alert Warning</p><p class="text-[9px] text-white/90">Front Door unlocked while Alarm Armed!</p></div>
+      </div>
+
+      <div id="partyBg" class="absolute inset-0 bg-gradient-to-tr from-purple-950/30 via-purple-900/5 to-[#0A332E]/20 pointer-events-none opacity-0 transition-opacity duration-700 z-10"></div>
+
+      <div class="absolute bottom-0 left-0 right-0 h-14 bg-appDark/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center px-4 pb-1.5 z-40">
+        <button id="nav-home" onclick="switchTab('home')" class="w-10 h-10 rounded-xl text-appTealLight transition-all flex justify-center items-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></button>
+        <button id="nav-devices" onclick="switchTab('devices')" class="w-10 h-10 rounded-xl text-appMuted hover:text-white transition-all flex justify-center items-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></button>
+        <button id="nav-settings" onclick="switchTab('settings')" class="w-10 h-10 rounded-xl text-appMuted hover:text-white transition-all flex justify-center items-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    let state = { user: 'Mounish', armed: true, locked: true, alarm: true, scene: 'morning', temp: 22, playing: false };
+
+    window.onload = () => {
+      let h = new Date().getHours(), g = h<12 ? "Morning" : h<17 ? "Afternoon" : "Evening";
+      $('greetingText').innerText = `Good ${g},`;
+      setInterval(() => { let d=new Date(), m=d.getMinutes(); $('statusBarTime').innerText=`${d.getHours()}:${m<10?'0'+m:m}`; }, 1000);
+      $('statusBarTime').innerText = `${new Date().getHours()}:${(new Date().getMinutes()<10?'0':'')+new Date().getMinutes()}`;
+    };
+
+    function switchTab(t) {
+      ['home', 'devices', 'settings'].forEach(id => {
+        $(`tab-${id}`).classList.toggle('hidden', id !== t);
+        $(`nav-${id}`).classList.replace(id===t?'text-appMuted':'text-appTealLight', id===t?'text-appTealLight':'text-appMuted');
+      });
+    }
+
+    function toggleSecurity() {
+      state.armed = !state.armed;
+      state.locked = state.armed; state.alarm = state.armed;
+      $('statusCard').className = state.armed ? "relative overflow-hidden rounded-[20px] p-4 bg-gradient-to-br from-[#0B4A3F] to-[#08352D] transition-all duration-500 shadow-lg cursor-pointer hover:scale-[1.01]" : "relative overflow-hidden rounded-[20px] p-4 bg-slate-800 transition-all duration-500 shadow-lg cursor-pointer hover:scale-[1.01]";
+      $('systemStatusTitle').innerText = state.armed ? "All Secure" : "Disarmed";
+      $('systemStatusIcon').className = `w-8.5 h-8.5 rounded-full bg-white/5 flex items-center justify-center ${state.armed ? 'text-appTealLight' : 'text-slate-400'} border border-white/10`;
+      $('systemStatusIcon').innerHTML = state.armed ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>` : `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>`;
+      updateLock(); updateAlarm();
+    }
+
+    function updateLock() {
+      $('lockDot').className = `w-1.5 h-1.5 rounded-full ${state.locked ? 'bg-appTealLight' : 'bg-red-400'}`;
+      $('lockLabel').innerText = state.locked ? "Front Door Locked" : "Front Door Unlocked";
+      $('lockLabel').className = `font-medium line-clamp-1 transition-colors ${state.locked ? 'text-white hover:text-emerald-300' : 'text-red-400 hover:text-red-300'}`;
+    }
+    
+    function updateAlarm() {
+      $('alarmDot').className = `w-1.5 h-1.5 rounded-full ${state.alarm ? 'bg-appTealLight' : 'bg-slate-500'}`;
+      $('alarmLabel').innerText = state.alarm ? "Alarm Active" : "Alarm Disabled";
+      $('alarmLabel').className = `font-medium line-clamp-1 transition-colors ${state.alarm ? 'text-white hover:text-emerald-300' : 'text-slate-400'}`;
+    }
+
+    function toggleLock() { state.locked = !state.locked; updateLock(); if(!state.locked && state.alarm) toast(); }
+    function toggleAlarm() { state.alarm = !state.alarm; updateAlarm(); }
+
+    function activateScene(s) {
+      state.scene = s;
+      let isM = s === 'morning';
+      $('scene-morning').className = `group p-4 rounded-[18px] bg-appCard border${isM?'-2 border-yellow-500/35':' border-white/5 hover:bg-[#1a2336]'} transition-all cursor-pointer flex flex-col justify-between aspect-square`;
+      $('morningStatus').innerText = isM ? 'Active' : 'Off';
+      $('morningStatus').className = `text-[11px] mt-0.5 ${isM ? 'text-appTealLight' : 'text-appMuted'}`;
+      
+      $('scene-party').className = `group p-4 rounded-[18px] bg-appCard border${!isM?'-2 border-purple-500/40 party-active-glow':' border-white/5 hover:bg-[#1a2336]'} transition-all cursor-pointer flex flex-col justify-between aspect-square`;
+      $('partyStatus').innerText = !isM ? 'Active' : 'Off';
+      $('partyStatus').className = `text-[11px] mt-0.5 ${!isM ? 'text-purple-400 font-semibold' : 'text-appMuted'}`;
+      
+      $('partyBg').style.opacity = isM ? 0 : 1;
+      $('musicTitle').innerText = isM ? "Morning Ambient Birds" : "Hyper EDM Party Beats 🎧";
+    }
+
+    function toggleLight(c) { $('lightRange').disabled = !c; $('lightRange').style.opacity = c ? 1 : 0.4; $('lightPctLabel').innerText = c ? `Brightness: ${$('lightRange').value}%` : "Lights Off"; }
+    function adjTemp(a) { state.temp += a; $('tempVal').innerText = `${state.temp}°C`; }
+    function togglePlay() { 
+      state.playing = !state.playing; 
+      $('musicPulse').classList.toggle('hidden', !state.playing);
+      $('playBtn').innerHTML = state.playing ? `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>` : `<svg class="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+    }
+    function saveUser() { if($('userInput').value.trim()) $('homeUsername').innerText = $('userInput').value; }
+    function toast() {
+      let t = $('toast');
+      t.classList.replace('-translate-y-44', 'translate-y-0'); t.classList.replace('opacity-0', 'opacity-100');
+      setTimeout(() => { t.classList.replace('translate-y-0', '-translate-y-44'); t.classList.replace('opacity-100', 'opacity-0'); }, 4000);
+    }
+  </script>
+</body>
+</html>
